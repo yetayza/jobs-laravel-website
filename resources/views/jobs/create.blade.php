@@ -7,32 +7,26 @@
             <h2>Add New Job</h2>
         </div>
         <div class="pull-right">
-            <a class="btn btn-primary" href="{{route('jobs.index')}}">Back</a>
+            <a class="btn btn-primary" href="{{ route('jobs.index') }}">Back</a>
         </div>
     </div>
 </div>
 
-@if ($errors->any())
+@if($errors->any())
     <div class="alert alert-danger">
         <strong>Opps!</strong> There were some problems with your input.<br><br>
         <ul>
             @foreach($errors->all() as $error)
-                <li>{{$error}}</li>
+                <li>{{ $error }}</li>
             @endforeach
         </ul>
     </div>
 @endif
 
-<form action="{{route('jobs.store')}}" method="POST">
+<form action="{{ route('jobs.store') }}" method="POST">
     @csrf
 
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-            <div class="form-group">
-                <strong>User_id</strong>
-                <input type="text" name="user_id" class="form-control" placeholder="user_id">
-            </div>
-        </div>
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="form-group">
                 <strong>Title</strong>

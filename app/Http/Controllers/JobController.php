@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Job;
 use Illuminate\Http\Request;
 
@@ -14,10 +15,11 @@ class JobController extends Controller
      */
     public function index()
     {
-        $jobs = Job::latest()->paginate(5);
+        $jobs = Job::where('user_id', '=', Auth::id())
+                    ->latest()
+                    ->paginate(5);
 
-        return view('jobs.index',compact('jobs'))
-            ->with('i',(request()->input('page',1)-1)*5);
+        return view('jobs.index', compact('jobs'));
     }
 
     /**
@@ -38,18 +40,22 @@ class JobController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id'=>'required',
+        //Todo:: use form request validation
+        $data = $request->validate([
             'title' =>'required',
             'description' =>'required',
             'salary' =>'required',
             'location' =>'required',
             'apply' =>'required',
         ]);
-        Job::create($request->all());
 
-        return redirect()->route('jobs.index')
-                         ->with('success','Job posted successfully!');
+        $data['user_id'] = Auth::id();
+
+        Job::create($data);
+
+        return redirect()
+                ->route('jobs.index')
+                ->with('success','Job posted successfully!');
     }
 
     /**
@@ -60,7 +66,7 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        return view('jobs.show',compact('job'));
+        return view('jobs.show', compact('job'));
     }
 
     /**
@@ -71,7 +77,13 @@ class JobController extends Controller
      */
     public function edit(Job $job)
     {
-        return view('jobs.edit',compact('job'));
+        if($job->user_id !== Auth::id()){
+            return redirect()
+                    ->route('jobs.index')
+                    ->with('error', 'Unauthorize to edit.');
+        }
+
+        return view('jobs.edit', compact('job'));
     }
 
     /**
@@ -83,8 +95,7 @@ class JobController extends Controller
      */
     public function update(Request $request, Job $job)
     {
-        $request->validate([
-            'user_id'=>'required',
+        $data = $request->validate([
             'title' =>'required',
             'description' =>'required',
             'salary' =>'required',
@@ -92,10 +103,18 @@ class JobController extends Controller
             'apply' =>'required',
         ]);
 
-        $job->update($request->all());
+        $data['user_id'] = Auth::id();
 
-        return redirect()->route('jobs.index')
-                         ->with('success','Job updated successfully!');
+        if($job->user_id !== Auth::id()) {
+            return back()
+                    ->with('error', 'unauthorize to edit');            
+        }
+
+        $job->update($data);
+
+        return redirect()
+            ->route('jobs.index')
+            ->with('success', 'Job updated successfully!'); 
     }
 
     /**
@@ -106,9 +125,15 @@ class JobController extends Controller
      */
     public function destroy(Job $job)
     {
-        $job->delete();
+        if($job->user_id !== Auth::id()){
+            return back()->with('error', 'Unauthorize to delete');
+        }
 
-        return redirect()->route('jobs.index')
-                         ->with('success','Job deleted!'); 
+        $job->delete();
+        
+        return redirect()
+                ->route('jobs.index')
+                ->with('success', 'Job deleted.');
+        
     }
 }

@@ -23,17 +23,11 @@
         </div>
     @endif
   
-    <form action="{{ route('jobs.update',$job->id) }}" method="POST">
+    <form action="{{ route('jobs.update', $job->id) }}" method="POST">
         @csrf
         @method('PUT')
    
          <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group">
-                    <strong>User_id</strong>
-                    <input type="text" name="user_id" value="{{ $job->user_id }}" class="form-control" placeholder="user_id">
-                </div>
-            </div>
            <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Title</strong>
