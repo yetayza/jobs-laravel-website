@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\Job;
+use App\Http\Requests\JobStoreRequest;
+use App\Http\Requests\JobUpdateRequest;
 use Illuminate\Http\Request;
 
 class JobController extends Controller
@@ -38,20 +40,11 @@ class JobController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(JobStoreRequest $request)
     {
-        //Todo:: use form request validation
-        $data = $request->validate([
-            'title' =>'required',
-            'description' =>'required',
-            'salary' =>'required',
-            'location' =>'required',
-            'apply' =>'required',
-        ]);
+        $validated = $request->validated();
 
-        $data['user_id'] = Auth::id();
-
-        Job::create($data);
+        Job::create($validated);
 
         return redirect()
                 ->route('jobs.index')
@@ -93,24 +86,17 @@ class JobController extends Controller
      * @param  \App\Job  $job
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Job $job)
+    public function update(JobUpdateRequest $request, Job $job)
     {
-        $data = $request->validate([
-            'title' =>'required',
-            'description' =>'required',
-            'salary' =>'required',
-            'location' =>'required',
-            'apply' =>'required',
-        ]);
-
-        $data['user_id'] = Auth::id();
+        
+        $validated = $request->validated();
 
         if($job->user_id !== Auth::id()) {
             return back()
                     ->with('error', 'unauthorize to edit');            
         }
 
-        $job->update($data);
+        $job->update($validated);
 
         return redirect()
             ->route('jobs.index')
